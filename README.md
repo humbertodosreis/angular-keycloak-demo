@@ -33,7 +33,8 @@ ng serve --open
 ### Angular
 
 1. Then configure the environment.ts files to your Keycloak Instance
-   > ./src/environments/environment.ts
+
+> ./src/environments/environment.ts
 
 ```typescript
 import { KeycloakConfig } from "keycloak-angular";
@@ -159,11 +160,11 @@ Steps below describe how to setup authorization.
 
 1. Create Roles
 
-![](./docs/images/keycloak-keycloak-create-roles.gif)
+![](./docs/images/keycloak-create-roles.gif)
 
 2. Assign Role to User
 
-![](./docs/images/keycloak-keycloak-assign-roles.gif)
+![](./docs/images/keycloak-assign-roles.gif)
 
 ### Angular
 
@@ -188,4 +189,4 @@ const routes: Routes = [
 
 ## Testing
 
-![](./docs/images/testing.gif)
+![](./docs/images/testing-v3.gif)
