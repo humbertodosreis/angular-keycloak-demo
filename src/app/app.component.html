@@ -1,6 +1,9 @@
 <mat-toolbar color="primary">
-  <span>Keycloak Demo</span>
-  <a mat-button [routerLink]="['/patients']" *ngIf="userDetails">Patients</a>
+  <span>App Demo</span>
+  <a mat-button [routerLink]="['/']"> <mat-icon>home</mat-icon> Home</a>
+  <a mat-button [routerLink]="['/patients']" *ngIf="userDetails"
+    ><mat-icon>people</mat-icon>Patients</a
+  >
   <span class="spacer"></span>
   <a mat-button routerLink="." (click)="doLogin()" *ngIf="!userDetails"
     >Sign In</a
