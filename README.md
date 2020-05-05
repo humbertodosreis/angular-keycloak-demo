@@ -1,27 +1,145 @@
-# AngularKeycloakTutorial
+# Angular Keycloak Demo App
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.4.
+## About
 
-## Development server
+Tutorial demonstrating how to configure an application with authentication and authorization through Keycloak.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+This demo we utilize a keycloak-angular lib, more details [here](https://github.com/mauriciovigolo/keycloak-angular).
 
-## Code scaffolding
+## Quickstart
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+1. Step #1: Clone the [angular-keycloak-demo](https://github.com/humbertodosreis/angular-keycloak-demo) repository.
 
-## Build
+```
+git clone https://github.com/humbertodosreis/angular-keycloak-demo
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+2. Step #2: Run project.
 
-## Running unit tests
+```
+ng serve --open
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+3. Step #3: Create and configure a client in Keycloak like image as below
 
-## Running end-to-end tests
+![keycloak-account-scope](./docs/images/keycloak-client-config.png)
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+4. Step #4: Then configure the environment.ts files to your Keycloak Instance
+   > ./src/environments/environment.ts
 
-## Further help
+```typescript
+import { KeycloakConfig } from "keycloak-angular";
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+// Add here your keycloak setup infos
+const keycloakConfig: KeycloakConfig = {
+  url: "KEYCLOAK-INSTANCE-URL", // http://localhost:8080/auth
+  realm: "REALM-NAME", // your realm: keycloak-sandbox
+  clientId: "CLIENT-ID-NAME", // angular-keycloak-tutorial
+};
+
+export const environment = {
+  production: false,
+  // ...
+  keycloakConfig,
+};
+```
+
+#### Using ngDoBootstrap
+
+The KeycloakService can be initialized before the application loading. When the Keycloak initialization is successful the application is bootstrapped.
+
+This has two major benefits.
+
+1. This is faster because the application isn't fully bootstrapped and
+1. It prevents a moment when you see the application without having the authorization.
+
+#### AppModule
+
+> ./src/app.module.ts
+
+```typescript
+import { NgModule, DoBootstrap, ApplicationRef } from "@angular/core";
+import { KeycloakAngularModule, KeycloakService } from "keycloak-angular";
+
+const keycloakService = new KeycloakService();
+
+@NgModule({
+  imports: [KeycloakAngularModule],
+  providers: [
+    {
+      provide: KeycloakService,
+      useValue: keycloakService,
+    },
+  ],
+  entryComponents: [AppComponent],
+})
+export class AppModule implements DoBootstrap {
+  async ngDoBootstrap(app) {
+    const { keycloakConfig } = environment;
+
+    try {
+      await keycloakService.init({ config: keycloakConfig });
+      app.bootstrap(AppComponent);
+    } catch (error) {
+      console.error("Keycloak init failed", error);
+    }
+  }
+}
+```
+
+> ./app/app-auth.guard.ts
+
+```typescript
+import { Injectable } from "@angular/core";
+import {
+  CanActivate,
+  Router,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from "@angular/router";
+import { KeycloakService, KeycloakAuthGuard } from "keycloak-angular";
+
+@Injectable()
+export class AppAuthGuard extends KeycloakAuthGuard implements CanActivate {
+  constructor(
+    protected router: Router,
+    protected keycloakAngular: KeycloakService
+  ) {
+    super(router, keycloakAngular);
+  }
+
+  isAccessAllowed(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.authenticated) {
+        this.keycloakAngular.login();
+        return;
+      }
+      console.log(
+        "role restriction given at app-routing.module for this route",
+        route.data.roles
+      );
+      console.log("User roles coming after login from keycloak :", this.roles);
+
+      const requiredRoles = route.data.roles;
+      if (!requiredRoles || requiredRoles.length === 0) {
+        return resolve(true);
+      } else {
+        if (!this.roles || this.roles.length === 0) {
+          resolve(false);
+        }
+        let granted: boolean = false;
+        for (const requiredRole of requiredRoles) {
+          if (this.roles.indexOf(requiredRole) > -1) {
+            granted = true;
+            break;
+          }
+        }
+        resolve(granted);
+      }
+    });
+  }
+}
+```
