@@ -189,4 +189,4 @@ const routes: Routes = [
 
 ## Testing
 
-![](./docs/images/testing-v3.gif)
+![](./docs/images/testing.gif)
