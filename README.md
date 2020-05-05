@@ -8,23 +8,31 @@ This demo we utilize a keycloak-angular lib, more details [here](https://github.
 
 ## Quickstart
 
-1. Step #1: Clone the [angular-keycloak-demo](https://github.com/humbertodosreis/angular-keycloak-demo) repository.
+1.  Clone the [angular-keycloak-demo](https://github.com/humbertodosreis/angular-keycloak-demo) repository.
 
 ```
 git clone https://github.com/humbertodosreis/angular-keycloak-demo
 ```
 
-2. Step #2: Run project.
+2.  Run project.
 
 ```
 ng serve --open
 ```
 
-3. Step #3: Create and configure a client in Keycloak like image as below
+### Keycloak
+
+1. Create a user.
+
+![](./docs/images/keycloak-create-user.gif)
+
+2. Create and configure a client in Keycloak like image as below
 
 ![keycloak-account-scope](./docs/images/keycloak-client-config.png)
 
-4. Step #4: Then configure the environment.ts files to your Keycloak Instance
+### Angular
+
+1. Then configure the environment.ts files to your Keycloak Instance
    > ./src/environments/environment.ts
 
 ```typescript
@@ -44,16 +52,13 @@ export const environment = {
 };
 ```
 
-#### Using ngDoBootstrap
+2. Initialize KeycloakService
 
-The KeycloakService can be initialized before the application loading. When the Keycloak initialization is successful the application is bootstrapped.
+In this tutorial, we go to set up the initialization the KeycloakService using the ngDoBootstrap.
+, another way is using the APP_INITIALIZER, [see plugin's docs for more details
+](https://github.com/mauriciovigolo/keycloak-angular#setup).
 
-This has two major benefits.
-
-1. This is faster because the application isn't fully bootstrapped and
-1. It prevents a moment when you see the application without having the authorization.
-
-#### AppModule
+3. Setup app.module.ts
 
 > ./src/app.module.ts
 
@@ -86,6 +91,8 @@ export class AppModule implements DoBootstrap {
   }
 }
 ```
+
+4. Create a app.guard
 
 > ./app/app-auth.guard.ts
 
@@ -143,3 +150,42 @@ export class AppAuthGuard extends KeycloakAuthGuard implements CanActivate {
   }
 }
 ```
+
+## Authorization
+
+Steps below describe how to setup authorization.
+
+### Keycloak
+
+1. Create Roles
+
+![](./docs/images/keycloak-keycloak-create-roles.gif)
+
+2. Assign Role to User
+
+![](./docs/images/keycloak-keycloak-assign-roles.gif)
+
+### Angular
+
+In `src/app/app-routing.module.ts`, associate role to route
+
+```typescript
+const routes: Routes = [
+  {
+    path: "",
+    component: HomeComponent,
+  },
+  {
+    path: "patients",
+    component: PatientsListComponent,
+    canActivate: [AppAuthGuard],
+    data: {
+      roles: ["Secretary", "Doctor", "Role Test"],
+    },
+  },
+];
+```
+
+## Testing
+
+![](./docs/images/testing.gif)
