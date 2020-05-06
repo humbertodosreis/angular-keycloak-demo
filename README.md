@@ -190,3 +190,17 @@ const routes: Routes = [
 ## Testing
 
 ![](./docs/images/testing.gif)
+
+## Further Reading
+
+* https://robferguson.org/blog/2019/12/24/getting-started-with-keycloak/
+* https://robferguson.org/blog/2019/12/29/angular-openid-connect-keycloak/
+* https://robferguson.org/blog/2019/12/31/angular-oauth2-keycloak/
+* https://brockallen.com/2019/01/03/the-state-of-the-implicit-flow-in-oauth2/
+* https://auth0.com/blog/oauth2-implicit-grant-and-spa/
+* https://www.scottbrady91.com/Angular/SPA-Authentiction-using-OpenID-Connect-Angular-CLI-and-oidc-client
+* https://medium.com/@sairamkrish/keycloak-integration-part-2-integration-with-angular-frontend-f2716c696a28
+
+
+
+
